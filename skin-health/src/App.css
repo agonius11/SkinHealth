@@ -1,0 +1,38 @@
+.site-layout-content {
+  padding: 24px;
+  background: #fff;
+}
+#components-layout-demo-top .logo {
+  float: left;
+  width: 120px;
+  height: 31px;
+  margin: 16px 24px 16px 0;
+  background: rgba(255, 255, 255, 0.3);
+}
+.ant-row-rtl #components-layout-demo-top .logo {
+  float: right;
+  margin: 16px 0 16px 24px;
+}
+
+
+.ant-radio-button-wrapper {
+  position: relative;
+  display: inline-block;
+  height: auto !important;
+  margin: 0;
+  padding: 15px !important;
+
+  color: rgba(0, 0, 0, 0.85);
+  font-size: 14px;
+  line-height: 30px;
+  background: #fff;
+  text-align: center;
+  border: 1px solid #d9d9d9;
+  border-top-width: 1.02px;
+  border-left-width: 0;
+  cursor: pointer;
+  transition: color 0.3s, background 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+
+
+
