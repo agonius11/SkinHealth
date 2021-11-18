@@ -2,14 +2,23 @@ import React, { useState } from "react";
 import { Layout, Radio, Space, Row, Col, Divider, Card, Rate } from "antd";
 import {ClockCircleOutlined} from '@ant-design/icons';
 import { defaultItems } from "../Assets/libs/data";
+import { useQuery } from "@apollo/client";
+import {DISPLAY_DATA} from "../Assets/libs/displayData";
 
 
 
 
 const { Header, Content, Footer } = Layout;
-const options = defaultItems;
+// const options = defaultItems;
 
 const SkinHealth = () => {
+  const { loading, error, data } = useQuery(DISPLAY_DATA);
+  let options = []
+
+  if(!loading){
+    options = data.master_categories;
+  }
+
   const [optionValue, setOptionValue] = useState("");
   const [optionCategoryValue, setOptionCategoryValue] = useState("");
   const [firstChildCategory, setFirstChildCategory] = useState([]);
@@ -19,28 +28,33 @@ const SkinHealth = () => {
   const [firstChildSubCategory, setFirstChildSubCategory] = useState([]);
 
   const radioChangeHandler = (e) => {
-    console.log("radio3 checked", e.target.value);
+    console.log("radio3 checked", e.target);
 
     setOptionValue(e.target.value);
+    
+    const selected = options.find((data) => data.id === e.target.value);
+    console.log(
+      selected
+    )
 
-    const selected = options.find((data) => data.key === e.target.value);
+    setFirstChildCategory(selected.categories);
 
-    setFirstChildCategory(selected.category);
-
-    setFirstChildSubCategory([]);
-    setOptionSubCategoryValue("");
+     setFirstChildSubCategory([]);
+     setOptionSubCategoryValue("");
   };
 
   const radioChangeCategoryHandler = (e) => {
     setOptionSubCategoryValue(e.target.value);
 
-    const selected = firstChildCategory.find(
-      (data) => data.key === e.target.value
-    );
+     const selected = firstChildCategory.find(
+       (data) => data.id === e.target.value
+      
+     );
 
-    console.log(selected);
+     console.log(selected);
 
-    setFirstChildSubCategory(selected.subCategory);
+     setFirstChildSubCategory(selected.services);
+    
   };
 
   return (
@@ -63,10 +77,10 @@ const SkinHealth = () => {
                     <Space size={[8, 16]} wrap>
                       <Radio.Button
                         style={{ width: "130px", margin: "0px 10px" }}
-                        value={data.key}
-                        key={data.key}
+                        value={data.id}
+                        key={data.id}
                       >
-                        <img src={data.icon} alt="Logo" />
+                        <img style = {{width:"40px", height:"40px", margin: "0 auto"}} src={data.image} alt="Logo" />
                         <br />
 
                         <span>{data.name}</span>
@@ -96,8 +110,8 @@ const SkinHealth = () => {
                             return (
                               <Radio.Button
                                 style={{ width: "100%" }}
-                                value={data.key}
-                                key={data.key}
+                                value={data.id}
+                                key={data.id}
                               >
                                 <div
                                   style={{
@@ -107,7 +121,7 @@ const SkinHealth = () => {
                                 >
                                   <span>{data.name}</span>
 
-                                  <span>{data.subCategory.length}</span>
+                                  <span>{data.services.length}</span>
                                 </div>
                               </Radio.Button>
                             );
@@ -164,7 +178,7 @@ const SkinHealth = () => {
 
                                   <div>
                                     <span>
-                                      {data.time}
+                                      {data.duration}
                                       {" min"} <ClockCircleOutlined />
                                     </span>
                                   </div>
