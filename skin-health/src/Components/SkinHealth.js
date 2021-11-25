@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { Layout, Radio, Space, Row, Col, Divider, Card, Rate } from "antd";
+import { Layout, Radio, Space, Row, Col, Modal, Card, Rate, Button, Input, Form, Select, InputNumber } from "antd";
 import {ClockCircleOutlined} from '@ant-design/icons';
 import { defaultItems } from "../Assets/libs/data";
-import { useQuery } from "@apollo/client";
+import { useQuery,useMutation } from "@apollo/client";
 import {DISPLAY_DATA} from "../Assets/libs/displayData";
+import { NEW_SERVICE } from "../Assets/libs/displayData";
 
 
 
@@ -12,27 +13,84 @@ const { Header, Content, Footer } = Layout;
 // const options = defaultItems;
 
 const SkinHealth = () => {
-  const { loading, error, data } = useQuery(DISPLAY_DATA);
+  
+  const [NewService] = useMutation(NEW_SERVICE);
+
+  const { loading, error, data:displayData } = useQuery(DISPLAY_DATA);
   let options = []
 
   if(!loading){
-    options = data.master_categories;
+    options = displayData.master_categories;
   }
 
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
   const [optionValue, setOptionValue] = useState("");
-  const [optionCategoryValue, setOptionCategoryValue] = useState("");
+  
   const [firstChildCategory, setFirstChildCategory] = useState([]);
 
   const [optionSubCategoryValue, setOptionSubCategoryValue] = useState("");
 
   const [firstChildSubCategory, setFirstChildSubCategory] = useState([]);
+  const [form] = Form.useForm();
+  const onFinish = (form) =>{
+   console.log(form);
 
-  const radioChangeHandler = (e) => {
-    console.log("radio3 checked", e.target);
+  }
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+  const handleOk = () => {
+    console.log(form.getFieldsValue());
+    setIsModalVisible(false);
+  };
+  const handleCancel = () => {
+    setIsModalVisible(false);
+  };
 
-    setOptionValue(e.target.value);
+    const addService = (values)=>{
+      NewService({
+        variables: {
+          category_id: values.Category,
+          duration: values.Duration,
+          in_clinic: true,
+          name: values.ServiceName,
+          rating: values.Rating,
+          price: values.Price
+        },
+        // update: (cache) => {
+        //   const data = cache.readQuery({
+        //     query: DISPLAY_DATA,
+        //     variables: {
+        //       category_id: values.Category,
+        //     },
+        //   });
+        //   console.log(data)
+        //   if (data) {
+        //     cache.writeQuery({
+        //       query: DISPLAY_DATA,
+        //       variables: {
+        //         category_id: values.Category,
+        //       },
+        //       data: {
+        //         services: [...displayData.master_categories, NewService],
+        //       },
+        //     });
+        //   }
+        // },
+      });
+    };
+
+  const radioChangeHandler = (e, from="tabs") => {
+    console.log(e);
+   
+
+     const selectedValue = from ==='tabs'?
+     e.target.value : e;
     
-    const selected = options.find((data) => data.id === e.target.value);
+    setOptionValue(selectedValue);
+    
+    const selected = options.find((data) => data.id === selectedValue);
     console.log(
       selected
     )
@@ -62,13 +120,83 @@ const SkinHealth = () => {
       <Layout className="layout">
         <Header>
           <div  className="logo" />
+          <Button type="primary" onClick={showModal}>
+        Add Service
+      </Button>
+      <Modal title="Add Service" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
+         <Form
+         labelCol={{ span: 8 }}
+         wrapperCol={{ span: 14 }}
+         layout="horizontal"
+         name="control-hooks"
+         onFinish={addService}
+         form = {form}
+         >
+           <Form.Item name="MasterCategory" label="Master Category">
+          <Select
+            placeholder="Choose Master Category"
+            onChange={(e) => radioChangeHandler(e, 'form') }
+
+            
+          >
+             {options.map((categories) => (
+              <Select.Option value={categories.id}>{categories.name}</Select.Option>
+            ))} 
+          </Select>
+          </Form.Item>
+
+          <Form.Item name="Category" label="Category">
+          <Select placeholder="Choose category">
+               {firstChildCategory?.map((categories) => (
+              <Select.Option value={categories.id}>{categories.name}</Select.Option>
+            ))}   
+          </Select>
+        </Form.Item>
+
+        <Form.Item name="ServiceName" label="Service name">
+          <Input placeholder="Enter Service name" />
+        </Form.Item>
+        <Form.Item name="Duration" label="Duration">
+        <Input           
+            placeholder="Duration"
+            // style={{ width: "60px" }}
+          />
+          {/* <TimePicker
+            value={displayData?.duration}
+            format="HH:mm"
+            style={{ width: "120px" }}
+          /> */}
+          </Form.Item>
+
+          <Form.Item name="Rating" label="Rating">
+          <InputNumber
+            min="0"
+            max="5"
+            placeholder="Rate"
+            style={{ width: "60px" }}
+          />
+        </Form.Item>
+
+        <Form.Item name="Price" label="Price">
+          <Input placeholder="Price" style={{ width: "60px" }} />
+        </Form.Item>
+        <Form.Item>
+
+        <Button type="primary" htmlType="submit">
+            Create New Service
+          </Button>
+
+        </Form.Item>
+         </Form>
+ 
+      </Modal>
         </Header>
 
         <div style={{ width: "auto", margin: "0 auto", marginTop: "50px" }}>
           <Content>
             <div className="site-layout-content">
               <Radio.Group
-                onChange={radioChangeHandler}
+                onChange={(e) => radioChangeHandler(e, 'tabs') }
                 optionType="button"
                 value={optionValue}
               >
